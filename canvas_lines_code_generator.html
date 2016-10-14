@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<meta charset="UTF-8"/>
+<html>
+<head>
+<style>
+*{
+	margin: 0px;
+	padding:0px;
+        font-size:14px;
+}
+body{
+	min-width: 968px;
+}
+.head{
+	display: block;
+	width: 100%;
+	position: ;
+	top:0px;
+	border:1px solid transparent;
+	padding: 5px;
+
+}
+div#buttons{
+	position: relative;
+	display: inline-block;
+	margin: 0 auto;
+	left:40%;
+	padding: 5px;
+	border:1px solid black;
+}
+.container{
+	position: absolute;
+
+	margin: 10px;
+	padding: 10px;
+	position: absolute;
+	width: 350px;
+	border:1px solid white;
+	background-color: #eee;
+	border-radius: 10px;
+	box-shadow:3px 3px 3px #bcd,
+	-3px -3px 3px #bcd,
+	3px -3px 3px #bcd,
+	-3px 3px 3px #bcd;
+	font-family: Arial;
+	padding-bottom: 10px;
+}
+.left{
+	top:50px;
+	left: 20px;
+}
+.right{
+	
+	top:50px;
+	right: 20px;
+}
+#txt_code{
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+	height: 100%;
+	overflow-y:visible;
+	max-width: 350px;
+	max-height: 800px;
+}
+#cvs1{
+		border:1px solid grey; 
+		/*position: ;*/
+		position: relative;
+		margin:0px auto;
+		top:50px;
+		display: block;
+	}
+	#container_cvs{
+		position:;
+		top:0px;
+		margin: 0px auto;
+		overflow-y:scroll;
+		
+
+	}
+.point{
+	cursor: pointer;
+}
+#ax{
+	width: 350px;
+	border:1px solid white;
+	/*padding: 5px;*/
+/*	background-color: #eee;
+	border-radius: 10px;*/
+/*	box-shadow:3px 3px 3px #bcd,
+	-3px -3px 3px #bcd,
+	3px -3px 3px #bcd,
+	-3px 3px 3px #bcd;
+	font-family: Arial;*/
+	/*padding-bottom: 10px;*/
+}
+.ctr{
+	margin: 10px;
+}
+.shape_msg{
+	border:2px solid white;
+	border-collapse:collapse;
+	padding: 3px;
+}
+.shape_msg .value{
+	width: 30px;
+
+}
+.single_value{
+	display: inline-block;
+	margin: 3px  0px;
+}
+b.index{
+	margin-right: 5px;
+}
+div.selected{
+	box-shadow: 
+	inset 1px 1px 2px #888888,
+	inset -1px -1px 2px #888888,
+	inset -1px 1px 2px #888888,
+	inset 1px -1px 2px #888888
+}
+#curt{
+	border:1px solid rgba(222,222,222,0.6);
+	width: 100px;
+	height: 40px;
+	background-color: rgba(222,222,222,0.3);
+	position:fixed;
+	top:0px;
+	left: 0px;
+	padding: 10px;
+	color:rgba(111,222,111,0.9 );
+	font-family: arial;
+	display:none;
+
+}
+.down_arrow{
+	/*display: inline-block;*/
+	position: absolute;
+	left:50px;
+	bottom: -20px;
+	width: 0px;
+	height: 0px;
+	border:10px transparent solid;
+	border-top:10px solid #eee;
+	
+	
+}
+
+</head>
+</style>
+<body>
+<div class="head">	
+	<div id="buttons">
+		创建曲线：
+		<button id="line" value="line" >line</button>
+		<button id="arc" value="arc">arc</button>
+		<button id="arcTo" value="arcTo">arcTo</button>
+		<button id="quadratic" value="quadratic">quadratic</button>
+		<button id="bezier" value="bezier">bezier</button>
+	</div>
+</div>
+
+<canvas id="cvs1"></canvas>			
+
+
+<div class="container left">
+
+
+	<div class="ctr">
+		<button id="hide" value="hide anchor" class="hide">隐藏锚点</button>
+	</div>
+	<div id="ax">
+		
+	</div>	
+</div>
+<div class="container right">
+	<p>	
+	代码：
+	</p>
+	<textarea type="text" id="txt_code" readonly="readonly" ></textarea> 
+</div>
+<div id="curt">
+	
+	<div id="curt_ax">
+		
+		
+	</div>
+	<div class="down_arrow"></div>
+</div>
+<!-- <p class="scroll-wrap">111</p>-->
+ <!-- <p id="demo"></p> -->
+
+
+<script type="text/javascript" src="jquery.js"></script>
+
+<script>
+window.onload=function(){
+	var iSelectedIndex;
+	var e_curt=document.getElementById("curt")
+	var e_curt_ax=document.getElementById("curt_ax")
+	var eBttnsContainer=document.getElementById("buttons")
+	var eBttns=eBttnsContainer.getElementsByTagName('button')
+	var ehide=document.getElementById('hide')
+	var iHeightCnvs=674;
+	var iWidthCnvs=1024;
+	var eCnvs1=document.getElementById('cvs1');
+	var e_ax=document.getElementById('ax');
+	eCnvs1.width=iWidthCnvs;
+	eCnvs1.height=iHeightCnvs;
+	var eCnvs1Ctt=eCnvs1.getContext('2d');
+	eCnvs1Ctt.strokeStyle="#aaa"
+	var e_txt_code=document.getElementById("txt_code")
+	var sPointingClass="inset 1px 1px 2px #888888,inset -1px -1px 2px #888888,inset -1px 1px 2px #888888,inset 1px -1px 2px #888888"
+	//var sCode="",sNewCode="";
+	var x0=100,y0=100,x1=300,y1=300,x2=400,y2=300,x3=200,y3=200,r=50,r2=6;  //dufault value
+	//x0,y0,x1,y1,x2,y2,x3,y3,r
+	var jShapes=[
+		//{"shape":"arc","x1":300,"y1":300,"x2":400,"y2":300,"r":"","start":0,"end":2*Math.PI}
+
+	];   //存放曲线对象
+	//console.log("r:"+jShapes[0].r)
+	var newShp; //临时存放新的曲线对象
+
+	for (var i = eBttns.length - 1; i >= 0; i--) { //按键增加曲线
+		eBttns[i].onclick=function(){
+			fCreateDefault(this.id)
+			fReDraw(eCnvs1Ctt,jShapes)
+			//console.log("get id:",this.id)
+		//	console.log("get jShapes:",jShapes)
+		}
+	}
+	function fShowCode(AjShapes,ctx){  //显示代码
+		var sCode="",sNewCode="";
+		for (var i=0; i <= AjShapes.length-1; i++){
+				//console.log("shape:  "+AjShapes[i].shape)
+			switch(AjShapes[i].shape){
+				case "line":
+					sNewCode="ctx.beginPath();\n"
+					+"ctx.lineTo("+AjShapes[i].x0+","+AjShapes[i].y0+");\n"
+					+"ctx.lineTo("+AjShapes[i].x1+","+AjShapes[i].y1+");\n"
+					+"ctx.stroke();\n"
+					//console.log("sNewCode:",sNewCode)
+					sCode=sCode+sNewCode;
+
+					break;
+				case "arc":
+					var deltX=AjShapes[i].x2-AjShapes[i].x1,deltY=AjShapes[i].y2-AjShapes[i].y1;
+					//console.log("(AjShapes[i].x1:",AjShapes[i].x1,AjShapes[i].y1,AjShapes[i].r)
+					sNewCode="ctx.beginPath();\n"
+					+"ctx.arc("+AjShapes[i].x1+","+AjShapes[i].y1+","+Math.sqrt(Math.pow(deltX,2)+Math.pow(deltY,2))+","+AjShapes[i].start+","+AjShapes[i].end/Math.PI+"*Math.PI"+");\n"
+					+"ctx.stroke();\n"
+					sCode=sCode+sNewCode;
+					break;
+				case "arcTo":
+					sNewCode=
+					"ctx.beginPath();\n"
+					+"ctx.moveTo("+AjShapes[i].x1+","+AjShapes[i].y1+");\n"
+					+"ctx.arcTo("+AjShapes[i].x1+","+AjShapes[i].y1+","+AjShapes[i].x2+","+AjShapes[i].y2+","+AjShapes[i].r+");\n"
+					+"ctx.stroke();\n"
+					sCode=sCode+sNewCode;
+					break;
+				case "quadratic":
+					sNewCode=
+					"ctx.moveTo("+AjShapes[i].x0+","+AjShapes[i].y0+");\n"
+					+"ctx.quadraticCurveTo("+AjShapes[i].x1+","+AjShapes[i].y1+","+AjShapes[i].x2+","+AjShapes[i].y2+");\n"
+					+"ctx.stroke();\n"
+					sCode=sCode+sNewCode;
+					break;
+				case "bezier":
+					sNewCode=
+					"ctx.moveTo("+AjShapes[i].x0+","+AjShapes[i].y0+");\n"
+					+"ctx.bezierCurveTo("+AjShapes[i].x1+","+AjShapes[i].y1+","+AjShapes[i].x2+","+AjShapes[i].y2+","+AjShapes[i].x3+","+AjShapes[i].y3+");\n"
+					+"ctx.stroke();\n"
+					sCode=sCode+sNewCode;
+					break;
+				default:
+					alert("AjShapes "+i+" is illegal");
+					break;
+			}
+			var patt= new RegExp("\n","g"),num=0;
+			var result=patt.exec(sCode);
+			while(patt.exec(sCode)!=null){
+				num++;
+			}
+			//console.log("num:",num)
+			//alert(patt.lastIndex)
+			//console.log("patt.lastIndex",patt.lastIndex)
+			e_txt_code.style.height=(num*15+30)+"px";
+			e_txt_code.innerHTML=sCode;
+		}
+	}
+	function fShowAxis(AjShapes,Ae,AiSelectedIndex){
+		if(AiSelectedIndex==undefined){
+			AiSelectedIndex=null;
+		}
+		for( i = 0; i < Ae.childNodes.length;i){	 //清空
+		//	console.log("removing nodes"+i,Ae.childNodes[i])
+			Ae.removeChild(Ae.childNodes[i])
+		}
+		//console.log("AjShapes:",AjShapes)
+		if(!AjShapes.length) return 0;
+		//console.log("running")
+		var i,x;
+		var eNewGroup,eNewSingle;
+		var outBox;
+		var shape_msg=Ae.getElementsByClassName("shape_msg");
+		
+		//console.log("shape_msg:",shape_msg)
+		// console.log("shape_msg length:",shape_msg.length)
+		// 	console.log("e_ax length",Ae.childNodes.length);
+
+	
+		for( i =0; i < AjShapes.length; i++){//重新创建
+			outBox=null;
+			outBox=document.createElement("div");
+			outBox.className="shape_msg";
+			if(AiSelectedIndex===i){
+				outBox.className="shape_msg selected";
+			}
+			var eb=document.createElement("b")
+			eb.className="index";
+			outBox.appendChild(eb);
+			var sTexB=document.createTextNode(i+":")
+			eb.appendChild(sTexB)
+			for ( x in AjShapes[i]){
+				//	console.log(x,AjShapes[i][x])
+				var innerBox=document.createElement("div")
+				innerBox.className="single_value";
+				outBox.appendChild(innerBox);
+				var eSpan=document.createElement("span");
+				eSpan.className="index"
+				var nText=document.createTextNode(x+":")
+				eSpan.appendChild(nText);
+				innerBox.appendChild(eSpan)
+				var eInput=document.createElement("input")
+				eInput.className="value"
+				eInput.setAttribute("value",AjShapes[i][x])
+				innerBox.appendChild(eInput)
+
+				
+			}
+			Ae.appendChild(outBox);
+			//console.log("(childNodes.length",Ae.childNodes.length);
+		}
+		var aInputTex=Ae.getElementsByTagName("input");  
+		for(i=0;i<aInputTex.length;i++){ // 根据指定坐标改变曲线；
+			aInputTex[i].onchange=function(){
+				//console.log("changed ctx:",this.value)
+				var sIndex=this.parentNode.parentNode.firstChild.innerHTML;
+				var sIndex2=this.parentNode.firstChild.innerHTML;
+			//	console.log(sIndex.search(":"))
+				var colonIndex=sIndex.search(":");
+				var colonIndex2=sIndex2.search(":");
+				var sI=sIndex.slice(0,colonIndex); console.log("sI:",sI)				
+				var sI2=sIndex2.slice(0,colonIndex2); console.log("attribue:",sI2)
+				jShapes[sI][sI2]=this.value;
+				fReDraw(eCnvs1Ctt,jShapes)	
+			}
+
+			//console.log("no."+i+":",sIndex)
+		}
+		//console.log("aInputTex:",aInputTex)
+		
+	}
+	function fDrawShapes(ctx,AjShapes){  //绘制曲线
+		fShowAxis(AjShapes,e_ax,iSelectedIndex)
+		fShowCode(AjShapes)
+		eCnvs1Ctt.strokeStyle="#aaa"
+		// fCreateDefault("line");
+		// fCreateDefault("arc");
+		// fCreateDefault("arcTo");
+		// fCreateDefault("quadratic");
+		// fCreateDefault("bezier");
+		for(var i = 0; i < AjShapes.length;i ++){
+			switch(AjShapes[i].shape){
+				case "line":
+					ctx.beginPath()
+					ctx.lineTo(AjShapes[i].x0,AjShapes[i].y0);
+					ctx.lineTo(AjShapes[i].x1,AjShapes[i].y1);
+					ctx.stroke();
+					break;
+				case "arc":
+					ctx.beginPath()
+					//console.log("(AjShapes[i].x1:",AjShapes[i].x1,AjShapes[i].y1,AjShapes[i].r)
+					var deltX=AjShapes[i].x2-AjShapes[i].x1,deltY=AjShapes[i].y2-AjShapes[i].y1;
+
+					ctx.arc(AjShapes[i].x1,AjShapes[i].y1,Math.sqrt(Math.pow(deltX,2)+Math.pow(deltY,2)),AjShapes[i].start,AjShapes[i].end)
+					ctx.stroke();
+					break;
+				case "arcTo":
+					ctx.beginPath()
+					ctx.moveTo(AjShapes[i].x0,AjShapes[i].y0)
+					ctx.arcTo(AjShapes[i].x1,AjShapes[i].y1,AjShapes[i].x2,AjShapes[i].y2,AjShapes[i].r)
+					ctx.stroke();
+					break;
+				case "quadratic":
+					ctx.moveTo(AjShapes[i].x0,AjShapes[i].y0)
+					ctx.quadraticCurveTo(AjShapes[i].x1,AjShapes[i].y1,AjShapes[i].x2,AjShapes[i].y2)
+					ctx.stroke();
+
+				case "bezier":
+					ctx.moveTo(AjShapes[i].x0,AjShapes[i].y0)
+					ctx.bezierCurveTo(AjShapes[i].x1,AjShapes[i].y1,AjShapes[i].x2,AjShapes[i].y2,AjShapes[i].x3,AjShapes[i].y3)
+					ctx.stroke();
+					break;
+				default:
+					alert("AjShapes "+i+" is illegal");
+					break;
+		 	}
+		 }
+	 } 
+
+	function fCreateDefault(AShapeType){  //创建曲线
+	 	switch(AShapeType){
+	 		case "line":
+		 		newShp={"shape":"line","x0":x0,"y0":y0,"x1":x1,"y1":y1}
+			 	jShapes.push(newShp)
+			 	break;
+		 	case "arc":
+			 	newShp={"shape":"arc","x1":x1,"y1":y1,"x2":x2,"y2":y1,"start":0,"end":2*Math.PI}
+			 	jShapes.push(newShp)
+			 	break;
+		 	case "arcTo":
+			 	newShp={"shape":"arcTo","x0":x0,"y0":y0,"x1":x1,"y1":y1,"x2":x2,"y2":y2,"r":150}  
+			 	jShapes.push(newShp)
+			 	break;
+		 	case "quadratic":
+			 	newShp={"shape":"quadratic","x0":x0,"y0":y0,"x1":x1,"y1":y1,"x2":x2,"y2":y2}
+				jShapes.push(newShp)
+				break;
+			case "bezier":
+				newShp={"shape":"bezier","x0":x0,"y0":y0,"x1":x2,"y1":y2,"x2":x1,"y2":y1,"x3":x3,"y3":y3}
+			 	jShapes.push(newShp)
+			 	break;
+		 	default:
+				alert("AShapeType  is illegal");
+				break;
+		 }
+	 }
+
+	function fShowAnchors(Actx,AjShapes){  //绘制节点
+		var l=AjShapes.length;
+		eCnvs1Ctt.strokeStyle="crimson"
+		eCnvs1Ctt.fillStyle="rgba(222,222,222,0.3)"
+		for(var i = 0; i < l; i++){
+			for(var sIndex in AjShapes[i]){
+				var bTest=/^x\d$/.test(sIndex);
+				if(bTest){
+					oNewPointed={}
+					oNewPointed.indexShapes=i;
+					oNewPointed.xname="x"+sIndex[1];
+					//console.log("oNewPointed.xname:",oNewPointed.xname)
+					oNewPointed.yname="y"+sIndex[1];
+					oNewPointed.x=AjShapes[i][oNewPointed.xname]; //console.log("oNewPointed.x",oNewPointed.x,AjShapes[i][oNewPointed.xname])
+					oNewPointed.y=AjShapes[i][oNewPointed.yname];
+					Actx.beginPath();
+					Actx.arc(oNewPointed.x,oNewPointed.y,r2,0,2*Math.PI)
+					Actx.stroke();
+					Actx.fill();
+				// 	var bCheck=Actx.isPointInPath(Ax,Ay);
+				// 	if(bCheck){
+				// 		jPointed.push(oNewPointed)
+				// //	console.log("oNewPointed:",oNewPointed)
+						
+				// 	}
+				}
+			}
+	
+		}
+		for(var i = 0; i < l; i++){
+			switch(AjShapes[i].shape){
+				case "line":
+
+					break;
+				case "arc":
+					// console.log("drawing anchor")
+					// Actx.beginPath()
+					// Actx.arc(AjShapes[i].x1,AjShapes[i].y1,r2,0,2*Math.PI)
+					// Actx.stroke();
+					// Actx.fill();
+					// Actx.beginPath()
+					// Actx.arc(AjShapes[i].x2,AjShapes[i].y2,r2,0,2*Math.PI)
+					// Actx.stroke();
+					// Actx.fill();
+					break;
+				case "arcTo":
+					fDrawLine(Actx,AjShapes[i].x0,AjShapes[i].y0,AjShapes[i].x1,AjShapes[i].y1);
+					fDrawLine(Actx,AjShapes[i].x2,AjShapes[i].y2,AjShapes[i].x1,AjShapes[i].y1);
+					break;
+				case "quadratic":
+					fDrawLine(Actx,AjShapes[i].x0,AjShapes[i].y0,AjShapes[i].x1,AjShapes[i].y1);
+					fDrawLine(Actx,AjShapes[i].x2,AjShapes[i].y2,AjShapes[i].x1,AjShapes[i].y1);
+					break;
+				case "bezier":
+					// fDrawaAnchCircle(Actx,AjShapes[i].x0,AjShapes[i].y0)
+					// fDrawaAnchCircle(Actx,AjShapes[i].x1,AjShapes[i].y1)
+					// fDrawaAnchCircle(Actx,AjShapes[i].x2,AjShapes[i].y2)
+					// fDrawaAnchCircle(Actx,AjShapes[i].x3,AjShapes[i].y3)
+					fDrawLine(Actx,AjShapes[i].x0,AjShapes[i].y0,AjShapes[i].x1,AjShapes[i].y1);
+					fDrawLine(Actx,AjShapes[i].x2,AjShapes[i].y2,AjShapes[i].x3,AjShapes[i].y3);
+					break;
+				default:
+					alert("AjShapes "+i+" is illegal");
+					break;
+			}
+		}
+	}
+	var bFlagAnchor=true;
+	//var bFlagAnchorline=true;
+	ehide.onclick=function(){
+		if(ehide.className=="hide"){
+			bFlagAnchor=false;
+			ehide.className="show"
+			fHideAllAnchors(eCnvs1Ctt,jShapes);
+			ehide.innerHTML="显示锚点"
+		//	var temp=cvs1.onmousedown; console.log(temp)
+			//cvs1.onmousedown=null;console.log(temp)
+		}else if(ehide.className=="show"){
+			bFlagAnchor=true;
+			ehide.className="hide"
+			ehide.innerHTML="隐藏锚点";
+			fReDraw(eCnvs1Ctt,jShapes);
+			//cvs1.onmousedown=temp; console.log(cvs1.onmousedown)
+		}
+		
+	}
+	cvs1.onmousemove=function(e){
+		var e = e || window.event;
+		var self = this;
+		var iX=e.clientX-self.offsetLeft+document.body.scrollLeft;
+		var iY=e.clientY-self.offsetTop+document.body.scrollTop;
+		var oPointed=fCheckPoints(eCnvs1Ctt,jShapes,iX,iY)
+		console.log("x:",iX,"y:",iY)
+		//console.log(document.body.scrollTop)
+		if(oPointed){
+			console.log("oPointed:",oPointed);
+			e_curt_ax.innerHTML='Index '+oPointed.indexShapes+"<br> x:"+oPointed.x+" y:"+oPointed.y;
+			e_curt.style.display="block";
+			e_curt.style.top=oPointed.y+self.offsetTop-document.body.scrollTop-85+"px";
+			e_curt.style.left=oPointed.x+self.offsetLeft-document.body.scrollLeft-60+"px";
+		}else{
+			e_curt.style.display="none";
+		}
+
+	}
+	cvs1.onmousedown=function(e){
+		if(!bFlagAnchor){return 0;}
+		var e = e || window.event;
+		var self = this;
+		var iX=e.clientX-self.offsetLeft+document.body.scrollLeft;
+		var iY=e.clientY-self.offsetTop+document.body.scrollTop;	
+		var i=0;
+		//var jPointed=[]; //存放选中的anchor   x,y,index，xname,yIndex (属于哪个)
+		var oPointed=fCheckPoints(eCnvs1Ctt,jShapes,iX,iY)
+		// eCnvs1Ctt.beginPath();
+		// eCnvs1Ctt.arc(jShapes[i].x1,jShapes[i].y1,r2,0,2*Math.PI)
+		// bCheck=eCnvs1Ctt.isPointInPath(iX,iY);
+		// eCnvs1Ctt.beginPath();
+		// eCnvs1Ctt.arc(jShapes[i].x1+jShapes[i].r,jShapes[i].y1,r2,0,2*Math.PI)
+		// bCheck2=eCnvs1Ctt.isPointInPath(iX,iY);
+		//console.log("bTest2:"+bCheck2)
+		//console.log("down")
+		//console.log("oPointed:",oPointed)
+
+		if(oPointed){
+			self.className="point";
+			//console.log("oPointed:",oPointed.indexShapes);
+			var eMsgBoxPointing=document
+			.getElementById("ax").getElementsByClassName("shape_msg")[oPointed.indexShapes];
+			//console.log("eMsgBoxPointing:",eMsgBoxPointing)
+			eMsgBoxPointing.className="shape_msg selected";
+			iSelectedIndex=oPointed.indexShapes;
+			var iIndexS=oPointed.indexShapes,iIndexA=oPointed.indexAnchor;
+			//var iOrigR=jShapes[iIndexS].r;
+			document.onkeypress=function(e){
+					e=e || window.event;
+					//console.log("pressed",e.which||e.keyCode);
+					var x=e.which||e.keyCode;
+					if(oPointed&&x=="100"){
+						// console.log("fDelete",oPointed)
+						fDelete(jShapes,oPointed.indexShapes);
+						console.log("jShapes:",jShapes)
+						fRestPointing();
+
+					}
+			}
+			document.onmousemove=function(e){
+				var new_e = e || window.event;
+				var iNewX=new_e.clientX-self.offsetLeft+document.body.scrollLeft;
+				var iNewY=new_e.clientY-self.offsetTop+document.body.scrollTop;
+				document.onkeydown=function(e){
+					e=e || window.event;
+					//console.log(e.which||e.keyCode);
+						if(e.altKey){
+							var oNear=fCheckPoints(eCnvs1Ctt,jShapes,iNewX,iNewY,oPointed,10)
+							console.log("oNear:",oNear)
+							if(oNear){
+								iNewX=oNear.x;
+								iNewY=oNear.y;
+								fRestValue(jShapes,oPointed,iNewX,iNewY)
+								fReDraw(eCnvs1Ctt,jShapes)
+								}		
+						document.onkeyup=function(e){
+							iNewX=new_e.clientX-self.offsetLeft+document.body.scrollLeft;
+							iNewY=new_e.clientY-self.offsetTop+document.body.scrollTop;
+							fRestValue(jShapes,oPointed,iNewX,iNewY)
+							fReDraw(eCnvs1Ctt,jShapes)
+							e=e || window.event;
+							console.log("up",e.altKey);
+						}
+
+					}
+				}
+
+				fRestValue(jShapes,oPointed,iNewX,iNewY)
+				fReDraw(eCnvs1Ctt,jShapes)		
+			}	
+		}
+
+		document.onmouseup=function(){
+			fRestPointing();
+			if(eMsgBoxPointing){
+				//console.log("caneling eMsgBoxPointing:",eMsgBoxPointing.className)
+				eMsgBoxPointing.className="shape_msg";
+			}
+			
+		}
+		function fRestPointing(){
+			self.className="";
+			oPointed={};
+			document.onmousemove=null;
+			document.onkeydown=null;
+			document.onkeyup=null;
+			document.onkeypress=null;
+			iSelectedIndex=null;
+
+			//console.log("caneling eMsgBoxPointing:",eMsgBoxPointing.className)
+			fReDraw(eCnvs1Ctt,jShapes)
+		}
+	}
+	
+	function fReDraw(Actx,AjShapes){  //更新后重新绘制
+		bFlagAnchor=true; //bFlagAnchorline=true;
+		Actx.clearRect(0,0,iWidthCnvs,iHeightCnvs)
+		fDrawShapes(Actx,AjShapes)
+		fShowAnchors(Actx,AjShapes)
+
+	}
+	function fDelete(AjShapes,Aindex){
+		for (var i =Aindex; i <AjShapes.length-1; i++) {
+			AjShapes[i]=AjShapes[i+1];
+		}
+		AjShapes.pop()
+		//AjShapes[Aindex]=
+	}
+	function fHideAllAnchors(Actx,AjShapes){
+		Actx.clearRect(0,0,iWidthCnvs,iHeightCnvs)
+		fDrawShapes(Actx,AjShapes)
+	}
+	//@@  AoAvoid：all anchors of the anchor's line will not be checked with;
+	//@@   Ar:手动设置检测半径，默认为锚点半径大小
+	function fCheckPoints(Actx,AjShapes,Ax,Ay,AoAvoid,Ar){ 
+		if(AoAvoid==undefined){
+			AoAvoid={}
+		}
+		if(Ar==undefined){
+			Ar=r2
+		}
+		//console.log("checking")
+		var jPointed=[] //存放选中的anchor   x,y,index，xname,yname (属于哪个)
+		,oNewPointed={};//临时存放被选中的
+		var l=AjShapes.length;
+		//console.log("l=AjShapes.length:",AjShapes[0])
+		for(var i = 0; i < l; i++){
+			for(var sIndex in AjShapes[i]){
+				var bTest=/^x\d$/.test(sIndex);
+					//	console.log("checking bTest",bTest,sIndex)
+				if(bTest){
+					oNewPointed={}
+					oNewPointed.indexShapes=i;
+					oNewPointed.xname="x"+sIndex[1];
+					//console.log("oNewPointed.xname:",oNewPointed.xname)
+					oNewPointed.yname="y"+sIndex[1];
+					oNewPointed.x=AjShapes[i][oNewPointed.xname]; 
+				//	console.log("oNewPointed.x",oNewPointed.x,AjShapes[i][oNewPointed.xname])
+				//	console.log("clicking",Ax,Ay)
+					oNewPointed.y=AjShapes[i][oNewPointed.yname]; 
+					Actx.beginPath();
+					Actx.arc(oNewPointed.x,oNewPointed.y,Ar,0,2*Math.PI)
+					var bCheck=Actx.isPointInPath(Ax,Ay);
+				//	console.log("bCheck:",bCheck)
+				//	console.log("AoAvoid.indexShapes:",AoAvoid.indexShapes)
+					if(bCheck&&!(AoAvoid.indexShapes==i)){     
+						jPointed.push(oNewPointed) 
+						console.log("oNewPointed:",oNewPointed)
+						
+					}
+				}
+			}
+		/*	switch(AjShapes[i].shape){
+				case "line":
+
+					break;
+				case "arc":
+					//console.log("checking anchor")
+					Actx.beginPath();
+					Actx.arc(AjShapes[i].x1,AjShapes[i].y1,r2,0,2*Math.PI)
+					bCheck1=Actx.isPointInPath(Ax,Ay);
+					if(bCheck1){
+						oNewPointed={}
+						oNewPointed.indexShapes=i;
+						oNewPointed.xname="x1";
+						oNewPointed.yname="y1";
+						oNewPointed.x=AjShapes[i].x1;
+						oNewPointed.y=AjShapes[i].y1;
+						jPointed.push(oNewPointed)
+					}
+					//console.log("bCheck1:"+bCheck1)			
+					Actx.beginPath();
+					Actx.arc(AjShapes[i].x2,AjShapes[i].y2,r2,0,2*Math.PI)
+					bCheck2=Actx.isPointInPath(Ax,Ay);	
+					if(bCheck2){
+						oNewPointed={}
+						oNewPointed.indexShapes=i;
+						oNewPointed.xname="x2";
+						oNewPointed.yname="y2";
+						oNewPointed.x=AjShapes[i].x2;
+						oNewPointed.y=AjShapes[i].y2;
+						jPointed.push(oNewPointed)
+					}				
+					//console.log("bCheck2:"+bCheck2)			
+					//console.log("jPointed:",jPointed)			
+					
+
+					break;
+				case "arcTo":
+
+					break;
+				case "quadratic":
+
+					break;
+				case "bezier":
+				
+					break;
+				default:
+					alert("AjShapes "+i+" is illegal");
+					break;
+			}*/
+		}
+		if(!jPointed.length) return false;
+		var iDstMin,iDst,indexMin=0; //临时存放选中的anchor的圆形距鼠标点击位置的距离
+		l=jPointed.length;
+		iDstMin=Math.sqrt(Math.pow(jPointed[0].x,2)+Math.pow(jPointed[0].y,2))
+		//console.log("jPointed[0].x:",jPointed[0].x)
+		for(var i = 0; i < l; i++){
+			//jPointed[i].x*jPointed[i].x			
+			iDst=Math.sqrt(Math.pow(jPointed[i].x,2)+Math.pow(jPointed[i].y,2))
+			if(iDst<iDstMin){
+				iDstMin=iDst;
+				indexMin=i;
+			}
+		}
+		//console.log("finally selected",jPointed[indexMin])
+		return jPointed[indexMin];
+	}
+
+	function fRestValue(AjShapes,AoPointed,AiNewX,AiNewY){
+		AjShapes[AoPointed.indexShapes][AoPointed.xname]=AiNewX;
+		AjShapes[AoPointed.indexShapes][AoPointed.yname]=AiNewY;
+
+		//console.log(AjShapes[AoPointed.indexShapes][AoPointed.xname])
+	}
+	function fDrawLine(Actx,x1,y1,x2,y2){
+		Actx.save();
+		Actx.beginPath();
+		Actx.strokeStyle="rgba(222,222,0,0.6)"
+		Actx.fillStyle="rgba(111,111,111,0.3)"
+		Actx.moveTo(x1,y1);
+		Actx.lineTo(x2,y2)
+		Actx.stroke()
+		Actx.fill()
+		Actx.restore();
+	}
+	function fDrawaAnchCircle(Actx,x,y){
+		Actx.beginPath()
+		Actx.arc(x,y,r2,0,2*Math.PI)
+		Actx.stroke();
+		Actx.fill();
+	}
+
+	fReDraw(eCnvs1Ctt,jShapes)
+	console.log(jShapes)
+
+}
+
+</script>
+</body>
+</html>
